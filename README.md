@@ -28,8 +28,8 @@ Existing CLIP-guided methods train a decoder on watermark-centric text features 
 The released scripts use Python 3.12, PyTorch 2.5.1, CUDA 12.1, and an NVIDIA GPU.
 
 ```bash
-git clone https://github.com/shisyy/Guard4D.git
-cd Guard4D
+git clone https://github.com/shisyy/SemGuard.git
+cd SemGuard
 
 conda create -n semguard python=3.12 -y
 conda activate semguard
@@ -50,7 +50,7 @@ SemGuard uses four datasets to construct semantic interference during decoder le
 Arrange the data as follows:
 
 ```text
-Guard4D/
+SemGuard/
 ├── 4DGaussians/data/
 │   ├── dnerf/<scene>/train/*.png
 │   └── hypernerf/virg/<scene>/images/*
