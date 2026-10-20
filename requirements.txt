@@ -1,0 +1,15 @@
+compressai
+ftfy
+imageio[ffmpeg]
+kornia
+lpips-pytorch
+matplotlib
+numpy
+opencv-python
+pillow
+plyfile
+pytorch-msssim
+regex
+scipy
+tensorboard
+tqdm

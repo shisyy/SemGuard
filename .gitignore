@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Environments and editors
+.conda/
+.conda-env/
+.venv/
+venv/
+.vscode/
+.idea/
+
+# Native/CUDA build products
+build/
+dist/
+*.so
+*.pyd
+*.o
+*.obj
+*.a
+
+# Datasets and pretrained assets
+data/
+4DGaussians/data/
+pretrained/
+checkpoints/
+decoders/
+
+# Experiment outputs
+output/
+outputs/
+Experiment/
+Experiment_0/
+Experimentv1/
+logs/
+runs/
+wandb/
+
+# Large generated files
+*.pt
+*.pth
+*.ckpt
+*.ply
+*.npz
+*.zip
+*.tar
+*.tar.gz
+
+# OS files
+.DS_Store
+Thumbs.db
