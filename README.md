@@ -9,7 +9,7 @@ Beihang University, Zhongguancun Laboratory, and Peace-Bay Academy of Virtual Re
 
 > **TL;DR:** SemGuard closes the semantic-entanglement gap in CLIP-guided Gaussian watermarking. It pre-trains a reusable message decoder with progressively stronger visual-semantic interference, then freezes the decoder and embeds messages by optimizing compact spherical-harmonic offsets in static or dynamic Gaussian assets.
 
-![SemGuard motivation and comparison](assets/overview.png)
+<p align="center"><img src="assets/overview.png" alt="SemGuard motivation and comparison" width="100%"></p>
 
 ## Overview
 
@@ -21,7 +21,7 @@ Existing CLIP-guided methods train a decoder on watermark-centric text features 
 4. A lightweight decoder learns to recover the message from the mixed feature.
 5. During watermark embedding, the decoder and CLIP encoder are frozen; only Gaussian SH offsets are optimized.
 
-![SemGuard method](assets/method.png)
+<p align="center"><img src="assets/method.png" alt="SemGuard method" width="100%"></p>
 
 ## Installation
 
@@ -153,7 +153,7 @@ Datasets, pretrained Gaussian models, decoder checkpoints, and experiment output
 
 ## Qualitative results
 
-![SemGuard qualitative results](assets/results.png)
+<p align="center"><img src="assets/results.png" alt="SemGuard qualitative results" width="100%"></p>
 
 ## Repository structure
 
