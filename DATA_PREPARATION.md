@@ -13,4 +13,4 @@ done
 
 Files are restored to `output/<dataset>/<scene>/`. Extract both LLFF parts into the same directory. Download original images/camera data from the dataset links above.
 
-Set data paths in [ms_utils_divid.py](ms_utils_divid.py) and experiment paths in [setup_run_3d.sh](setup_run_3d.sh) or [setup_run_4d.sh](setup_run_4d.sh).
+Set image paths for decoder training in [ms_utils_divid.py](ms_utils_divid.py). See [setup_run_3d.sh](setup_run_3d.sh) and [setup_run_4d.sh](setup_run_4d.sh) for watermarking paths.
