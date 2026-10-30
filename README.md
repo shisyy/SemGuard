@@ -49,10 +49,6 @@ See [setup_run_3d.sh](setup_run_3d.sh) and [setup_run_4d.sh](setup_run_4d.sh) fo
 
 See [setup_run_3d.sh](setup_run_3d.sh) and [setup_run_4d.sh](setup_run_4d.sh) for commands Stage 2.
 
-## Visual distortions
-
-See [setup_run_3d.sh](setup_run_3d.sh) for commands.
-
 ## Qualitative results
 
 <p align="center"><img src="assets/view.png" alt="Qualitative comparison with GuardSplat" width="100%"></p>
