@@ -3,247 +3,114 @@
 **Yingying Shi, Zhong Zhou, Bin Zhou**  
 Beihang University, Zhongguancun Laboratory, and Peace-Bay Academy of Virtual Reality
 
-Official implementation of SemGuard. The manuscript and supplementary PDF will be released later.
+Official implementation of **SemGuard**.
 
-**TL;DR:** SemGuard pretrains a message decoder with progressively stronger scene-dependent visual semantic interference, then freezes the decoder and embeds watermarks by optimizing spherical-harmonic (SH) offsets in static and dynamic Gaussian assets.
+**TL;DR:** We train a message decoder with progressive visual semantic interference, then embed watermarks into static and dynamic Gaussian assets by optimizing spherical-harmonic offsets.
 
 <p align="center"><img src="assets/intro.png" alt="SemGuard motivation and performance comparison" width="100%"></p>
 
 ## Framework
 
-<p align="center"><img src="assets/method.png" alt="SemGuard decoder pretraining and Gaussian watermark embedding" width="100%"></p>
+<p align="center"><img src="assets/method.png" alt="SemGuard framework" width="100%"></p>
 
-SemGuard first combines message-related CLIP text features with visual features from unwatermarked scene images to train a message decoder under progressive semantic interference. The decoder and CLIP encoders are then frozen while asset-specific SH offsets are optimized for watermark embedding. For dynamic Gaussian assets, temporal image features are aggregated during decoding.
+We combine message-related CLIP text features with visual features from unwatermarked images to train a reusable message decoder. We then freeze the decoder and CLIP encoders and optimize SH offsets for watermark embedding.
 
-## 1) Environment and dependencies
+## 1) Get started
+
+- Python 3.12
+- CUDA 12.1
+- PyTorch 2.5.1
+- NVIDIA GPU
+
+**Create a Python environment**
 
 ```bash
 git clone https://github.com/shisyy/SemGuard.git
 cd SemGuard
+conda create -n semguard python=3.12 -y
+conda activate semguard
 ```
 
-Environment and dependency commands are provided in the author's [requirements.txt](requirements.txt). This file is preserved in its original form and contains installation commands. Follow the commands there together with the original backbone installation instructions:
+**Install dependencies**
 
-- Static Gaussian assets: [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting).
-- Dynamic Gaussian assets: [4DGaussians](https://github.com/hustvl/4DGaussians).
+Follow the installation commands in [requirements.txt](requirements.txt). Set up [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting) for static scenes and [4DGaussians](https://github.com/hustvl/4DGaussians) for dynamic scenes.
 
-The two backbone repositories are maintained by their original authors and are not bundled here. The SemGuard source files, configuration and stage scripts are uploaded unchanged from the author's supplied source directory.
+## 2) Prepare data
 
-The supplied directory structure is retained, including `Experiment/`, `decoders/`, `gaussian-splatting/`, `4DGaussians/` and `output/`. Empty directories use zero-byte `.gitkeep` placeholders because Git does not track directories by themselves. The backbone directories contain placeholders only; obtain their code from the original links above. The supplied `__pycache__/` files are also preserved. Processed data inside `output/` remains a separate Release download.
+We use [NeRF Synthetic (Blender)](https://www.matthewtancik.com/nerf), [LLFF](https://bmild.github.io/llff/), [D-NeRF](https://github.com/albertpumarola/D-NeRF) and [HyperNeRF](https://github.com/google/hypernerf).
 
-## 2) Data and clean Gaussian assets
+Download our [processed Gaussian assets](https://github.com/shisyy/SemGuard/releases/tag/rendered-assets-v2), or prepare them with 3D Gaussian Splatting and 4DGaussians. We modified the backbones to generate these assets; unmodified upstream code may produce different results.
 
-SemGuard uses four benchmark datasets:
+Extract the archives under `output/`. See [data preparation](DATA_PREPARATION.md) for details.
 
-| Type | Dataset | Gaussian backbone |
-| --- | --- | --- |
-| Static | [NeRF Synthetic / Blender](https://www.matthewtancik.com/nerf) | 3D Gaussian Splatting |
-| Static | [LLFF](https://bmild.github.io/llff/) | 3D Gaussian Splatting |
-| Dynamic | [D-NeRF](https://github.com/albertpumarola/D-NeRF) | 4DGaussians |
-| Dynamic | [HyperNeRF](https://github.com/google/hypernerf) | 4DGaussians |
+## 3) Train and evaluate the message decoder
 
-The author's processed Gaussian assets are available separately on the [data download page](https://github.com/shisyy/SemGuard/releases/tag/rendered-assets-v2). Extract the downloaded archives to obtain `output/<dataset>/<scene>/`. These assets include clean Gaussian models, deformation parameters for dynamic models, associated metadata and available rendered views. Original image/camera datasets are obtained from their respective authors.
-
-See [data preparation and provenance](DATA_PREPARATION.md) for scene lists, checksums and extraction instructions. The supplied assets were generated with author-modified backbone code/settings, so unmodified upstream code is not guaranteed to generate identical assets.
-
-## 3) Stage I: train the watermark decoder
-
-Both [setup_run_3d.sh](setup_run_3d.sh) and [setup_run_4d.sh](setup_run_4d.sh) contain a **Stage 1: Train the watermark decoder** section. It uses [make_decoder_divid.py](make_decoder_divid.py), with CLIP/message utilities and semantic image sources defined in [ms_utils_divid.py](ms_utils_divid.py).
-
-The scripts define the decoder experiment name as:
+Set the dataset paths and `used_datasets` in [ms_utils_divid.py](ms_utils_divid.py).
 
 ```bash
 EXP_NAME=${DECODER_BASE_NAME}_msg${msg_len}_${num_epochs}_${type_fusion_weight}
+
+python make_decoder_divid.py --mode train --msg_len "$msg_len" --save \
+    --num_epochs "$num_epochs" --sdir decoders/nerf_synthetic/${EXP_NAME} \
+    --type_fusion_weight "$type_fusion_weight" \
+    --type_fusion_weight_max 0.9 --type_fusion_weight_min 0.0
+
+python make_decoder_divid.py --mode test --msg_len "$msg_len" \
+    --sdir decoders/nerf_synthetic/${EXP_NAME}
 ```
 
-The supplied decoder-training command is:
+We use 400 decoder epochs for 4/8/16-bit messages and 800 for 32/48-bit messages. Set `type_fusion_weight=continuous` for progressive semantic interference.
+
+## 4) Watermark a 3DGS model
+
+Set `root`, `out_root`, `exp_root` and `item` for the dataset, clean Gaussian model, watermark output and scene:
 
 ```bash
-python make_decoder_divid.py \
-    --mode train \
-    --msg_len $msg_len \
-    --save \
-    --num_epochs $num_epochs \
-    --sdir decoders/nerf_synthetic/${EXP_NAME} \
-    --type_fusion_weight $type_fusion_weight \
-    --type_fusion_weight_max 0.9 \
-    --type_fusion_weight_min 0.0
-```
-
-The script comments specify 400 decoder epochs for 4/8/16-bit messages and 800 for 32/48-bit messages, with `continuous` as the example interference schedule. Set the variables for the intended experiment using the provided scripts. Semantic image sources are selected through `used_datasets` and the dataset paths in `ms_utils_divid.py`; these remain as supplied by the author.
-
-## 4) Stage II: watermark embedding and evaluation
-
-Use the complete commands in the matching author-provided stage script:
-
-| Gaussian asset | Stage script | Watermark entry point |
-| --- | --- | --- |
-| Static 3DGS | [setup_run_3d.sh](setup_run_3d.sh) | [run_3Ddivid.py](run_3Ddivid.py) |
-| Dynamic 4DGS | [setup_run_4d.sh](setup_run_4d.sh) | [run_4Ddivid.py](run_4Ddivid.py) |
-
-Each script contains a **Stage 2: Train and evaluate** section followed by an evaluation section. Training uses `--mode train`; evaluation uses `--mode eval`, the saved decoder and the watermark results from the matching experiment. The evaluation commands also show checkpoint selection with `--resume_num` and visual output with `--save_map`.
-
-Configure the variables used by these existing commands:
-
-| Variable | Meaning in the supplied scripts |
-| --- | --- |
-| `root` | Original dataset directory |
-| `out_root` | Clean Gaussian model directory |
-| `exp_root` | Watermark experiment output directory |
-| `item` | Scene name |
-| `mdir` | `$out_root/$item` |
-| `sdir` | `$exp_root/${EXP_NAME}/$item` |
-| `msg_len` | Watermark message length |
-| `num_epochs2` | Watermark optimization epochs |
-| `resume_num` | Watermark checkpoint selected for evaluation |
-
-The decoder path in both supplied scripts is `decoders/nerf_synthetic/${EXP_NAME}`. Follow the actual script values for the experiment rather than an additional launch wrapper.
-
-Set the scene paths as shown in the scripts, replacing the placeholders with your own directories and scene name:
-
-```bash
-root="<your_nerf_dir>"
-out_root="<your_render_dir>"
-exp_root="<your_Watermark_output_dir>"
-item="<nerf_item>"
 mdir=$out_root/$item
 sdir=$exp_root/${EXP_NAME}/$item
+decoder_path=decoders/nerf_synthetic/${EXP_NAME}
+
+# Watermark embedding (Blender example)
+python run_3Ddivid.py -s "$root/$item" -m "$mdir" -w \
+    --mode train --msg_len "$msg_len" --decoder_path "$decoder_path" \
+    --sdir "$sdir" --batch_size 16 --dtype blender --num_epochs2 "$num_epochs2"
+
+# Evaluation and visualization
+python run_3Ddivid.py -s "$root/$item" -m "$mdir" -w \
+    --mode eval --msg_len "$msg_len" --decoder_path "$decoder_path" \
+    --sdir "$sdir" --batch_size 16 --dtype blender --num_epochs2 100 \
+    --test_cams 10 --resume_num "$resume_num" --save_map
 ```
 
-### Static 3DGS: embedding
+Use `--dtype llff` for LLFF scenes. More settings are provided in [setup_run_3d.sh](setup_run_3d.sh).
 
-From the Stage 2 section of `setup_run_3d.sh` (the supplied example uses NeRF Synthetic):
+## 5) Watermark a 4DGS model
 
 ```bash
-python run_3Ddivid.py \
-    --decoder_path decoders/nerf_synthetic/${EXP_NAME} \
-    -s "$root/$item" \
-    -m "$mdir" \
-    -w \
-    --mode train \
-    --msg_len "$msg_len" \
-    --sdir "$sdir" \
-    --batch_size 16 \
-    --dtype blender \
-    --num_epochs2 "$num_epochs2"
+# Watermark embedding
+python run_4Ddivid.py -s "$root/$item" -m "$mdir" -w \
+    --mode train --msg_len "$msg_len" --decoder_path "$decoder_path" \
+    --sdir "$sdir" --batch_size 16 --num_epochs2 "$num_epochs2"
+
+# Evaluation and visualization
+python run_4Ddivid.py -s "$root/$item" -m "$mdir" -w \
+    --mode eval --msg_len "$msg_len" --decoder_path "$decoder_path" \
+    --sdir "$sdir" --batch_size 16 --num_epochs2 100 \
+    --resume_num "$resume_num" --save_map
 ```
 
-### Static 3DGS: evaluation and visualization
+See [setup_run_4d.sh](setup_run_4d.sh) for the stage commands and experiment settings.
 
-Set `resume_num` to the checkpoint you want to evaluate, as specified in the script:
+## 6) Visual distortions
 
-```bash
-resume_num="<your_resume_num>"
-python run_3Ddivid.py \
-    --decoder_path decoders/nerf_synthetic/${EXP_NAME} \
-    -s "$root/$item" \
-    -m "$mdir" \
-    -w \
-    --mode eval \
-    --msg_len "$msg_len" \
-    --sdir "$sdir" \
-    --batch_size 16 \
-    --dtype blender \
-    --num_epochs2 100 \
-    --test_cams 10 \
-    --resume_num "$resume_num" \
-    --save_map
-```
+Distortion settings and the Stage III command are provided in [setup_run_3d.sh](setup_run_3d.sh), with implementations in [attack_utils.py](attack_utils.py).
 
-### Dynamic 4DGS: embedding
+- Single distortions: GaussianNoise, Rotation, Resize, GaussianBlur, Crop, Brightness, JPEGCompress and VAEBmshj2018.
+- Combined example: Crop, Brightness and JPEGCompress.
 
-The corresponding command from the Stage 2 section of `setup_run_4d.sh` is reproduced with its supplied arguments:
+## Qualitative results
 
-```bash
-python run_4Ddivid.py \
-    --decoder_path decoders/nerf_synthetic/${EXP_NAME} \
-    -s "$root/$item" \
-    -m "$mdir" \
-    -w \
-    --mode train \
-    --msg_len "$msg_len" \
-    --sdir "$sdir" \
-    --batch_size 16 \
-    --dtype blender \
-    --num_epochs2 "$num_epochs2"
-```
-
-### Dynamic 4DGS: evaluation and visualization
-
-From the evaluation section of `setup_run_4d.sh`:
-
-```bash
-resume_num="<your_resume_num>"
-python run_4Ddivid.py \
-    --decoder_path decoders/nerf_synthetic/${EXP_NAME} \
-    -s "$root/$item" \
-    -m "$mdir" \
-    -w \
-    --mode eval \
-    --msg_len "$msg_len" \
-    --sdir "$sdir" \
-    --batch_size 16 \
-    --dtype blender \
-    --num_epochs2 100 \
-    --test_cams 10 \
-    --resume_num "$resume_num" \
-    --save_map
-```
-
-## 5) Stage III: visual distortions for 3DGS
-
-The **Stage 3: Add visual distortions to the 3DGS model** section of [setup_run_3d.sh](setup_run_3d.sh) provides single-distortion and combined-distortion settings and the associated command. Distortions are implemented in [attack_utils.py](attack_utils.py).
-
-The supplied single-distortion list contains Gaussian noise, rotation, resize, Gaussian blur, crop, brightness, JPEG compression and VAE compression. The combined example contains crop, brightness and JPEG compression. Use the parameters and command in that script for the intended experiment.
-
-The distortion settings in `setup_run_3d.sh` are:
-
-```bash
-# Single distortions
-attacks=(
-  GaussianNoise
-  Rotation
-  Resize
-  GaussianBlur
-  Crop
-  Brightness
-  JPEGCompress
-  VAEBmshj2018
-)
-
-# Combined distortions
-combined_attacks=(
-  Crop
-  Brightness
-  JPEGCompress
-)
-```
-
-The Stage 3 command is transcribed below, retaining the entry-point filename and arguments written in the author's script. Set `decoder_path`, `attack`, `batch_size`, `learning_rate`, `lambda_msg` and `eval_interval` for the intended distortion experiment:
-
-```bash
-python run_3Ddivid_.py \
-    --decoder_path "$decoder_path" \
-    -s "$root/$item" \
-    -m "$mdir" \
-    -w \
-    --mode train \
-    --msg_len "$msg_len" \
-    --sdir "$sdir" \
-    --batch_size "$batch_size" \
-    --dtype blender \
-    --atypes "$attack" \
-    --learning_rate "$learning_rate" \
-    --lambda_msg "$lambda_msg" \
-    --num_epochs2 100 \
-    --eval_interval "$eval_interval"
-```
-
-## Qualitative comparison
-
-<p align="center"><img src="assets/view.png" alt="Original Gaussian renders, GuardSplat and SemGuard qualitative comparison" width="100%"></p>
-
-Paper figure comparing original renders, GuardSplat and SemGuard. The star denotes the static semantic image pool; the dagger denotes the mixed static/dynamic pool.
+<p align="center"><img src="assets/view.png" alt="Qualitative comparison with GuardSplat" width="100%"></p>
 
 ## Citation
 
@@ -257,6 +124,6 @@ Paper figure comparing original renders, GuardSplat and SemGuard. The star denot
 
 ## Acknowledgements
 
-This work builds on [GuardSplat](https://github.com/NarcissusEx/GuardSplat), [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting), [4DGaussians](https://github.com/hustvl/4DGaussians), [CLIP](https://github.com/openai/CLIP) and [Diff-JPEG](https://github.com/necla-ml/Diff-JPEG). We thank their authors for releasing their code. Dataset ownership and applicable terms remain with the original authors.
+We build our project on [GuardSplat](https://github.com/NarcissusEx/GuardSplat), [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting), [4DGaussians](https://github.com/hustvl/4DGaussians), [CLIP](https://github.com/openai/CLIP) and [Diff-JPEG](https://github.com/necla-ml/Diff-JPEG). We thank the authors for their work and code release.
 
-Contact: Yingying Shi, `yyshi@buaa.edu.cn`.
+Contact: `yyshi@buaa.edu.cn`.

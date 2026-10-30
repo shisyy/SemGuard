@@ -1,43 +1,32 @@
-# Data preparation and provenance
+# Data preparation
 
-## What is provided
+We use [NeRF Synthetic (Blender)](https://www.matthewtancik.com/nerf), [LLFF](https://bmild.github.io/llff/), [D-NeRF](https://github.com/albertpumarola/D-NeRF) and [HyperNeRF](https://github.com/google/hypernerf).
 
-SemGuard uses the first two benchmark families discussed by each backbone: NeRF Synthetic (Blender) and LLFF for 3D Gaussian Splatting, and D-NeRF and HyperNeRF for 4DGaussians. This refers to four dataset families, not just two scenes per family.
+We prepare static Gaussian assets with [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting) and dynamic assets with [4DGaussians](https://github.com/hustvl/4DGaussians). Our processed assets were generated with modified backbone code/settings; unmodified upstream code may produce different results.
 
-The release archives contain the author's existing `output/` assets. Depending on the family, these include PLY Gaussian models, configuration files, camera metadata, deformation weights and rendered views. They are derived assets, not new original datasets or a redistribution of every source training image.
+## Download
 
-| Archive family | Scenes |
+Download our [processed Gaussian assets and SHA256SUMS](https://github.com/shisyy/SemGuard/releases/tag/rendered-assets-v2). The archives contain clean Gaussian models, dynamic deformation parameters, metadata and available rendered views. Download original image/camera datasets from the links above.
+
+| Archive | Scenes |
 | --- | --- |
-| `dnerf` | bouncingballs, hellwarrior, hook, jumpingjacks, lego, mutant, standup, trex |
-| `hypernerf` | 3dprinter, banana, broom2, chicken |
-| `nerf_synthetic` | chair, drums, ficus, hotdog, lego, materials, mic, ship |
-| `nerf_llff_data` part 1 | fern, flower, fortress, horns |
-| `nerf_llff_data` part 2 | leaves, orchids, room, trex |
+| D-NeRF | bouncingballs, hellwarrior, hook, jumpingjacks, lego, mutant, standup, trex |
+| HyperNeRF | 3dprinter, banana, broom2, chicken |
+| NeRF Synthetic | chair, drums, ficus, hotdog, lego, materials, mic, ship |
+| LLFF part 1 | fern, flower, fortress, horns |
+| LLFF part 2 | leaves, orchids, room, trex |
 
-## Download the author's processed assets
+## Extract
 
-Download the `.tar.zst` archives and `SHA256SUMS` from [GitHub Releases](https://github.com/shisyy/SemGuard/releases). LLFF is distributed in two independently extractable archives. Extract all archives from the repository root:
+Run from the SemGuard root:
 
 ```bash
 sha256sum -c SHA256SUMS
 for archive in semguard-rendered-*.tar.zst; do
-  tar --zstd -xf "$archive"
+    tar --zstd -xf "$archive"
 done
 ```
 
-Install `zstd` if your tar installation requires it. Extraction restores `output/<dataset>/<scene>/`. Download original image/camera datasets separately using the links below. Saved `cfg_args` files may contain author-machine paths; use explicit `-s` and `-m` arguments for your local paths. Only load model/checkpoint files obtained from trusted sources.
+The assets are extracted to `output/<dataset>/<scene>/`. Extract both LLFF archives into the same directory; no concatenation is needed. Install `zstd` if required by your tar installation.
 
-## Original sources
-
-- [NeRF Synthetic / Blender](https://www.matthewtancik.com/nerf): NeRF, Mildenhall et al.
-- [LLFF](https://bmild.github.io/llff/): Local Light Field Fusion, Mildenhall et al.
-- [D-NeRF](https://github.com/albertpumarola/D-NeRF): D-NeRF, Pumarola et al.
-- [HyperNeRF](https://github.com/google/hypernerf): HyperNeRF, Park et al. Follow the [4DGaussians preparation instructions](https://github.com/hustvl/4DGaussians#data-preparation) for its Nerfies-style layout and point-cloud preprocessing.
-
-## Backbone preparation and SemGuard stages
-
-Static assets were constructed with [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting); dynamic assets were constructed with [4DGaussians](https://github.com/hustvl/4DGaussians). Refer to the original repositories for backbone installation, dataset preprocessing, training and rendering instructions.
-
-The supplied processed assets were generated with author-modified code and settings. Unmodified upstream code is not guaranteed to generate identical assets. Downloading the supplied archives gives the author's actual processed assets.
-
-For SemGuard decoder pretraining, watermark embedding, evaluation and distortions, follow the existing stage commands in [setup_run_3d.sh](setup_run_3d.sh) and [setup_run_4d.sh](setup_run_4d.sh). The variables `root`, `out_root`, `exp_root` and `item` in those scripts identify the source dataset, clean Gaussian assets, watermark output and scene. These source scripts are preserved unchanged.
+Set the dataset paths in [ms_utils_divid.py](ms_utils_divid.py) and the experiment paths in [setup_run_3d.sh](setup_run_3d.sh) or [setup_run_4d.sh](setup_run_4d.sh).
