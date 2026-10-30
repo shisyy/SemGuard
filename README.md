@@ -41,6 +41,16 @@ We use [NeRF Synthetic (Blender)](https://www.matthewtancik.com/nerf), [LLFF](ht
 
 We generate Gaussian assets using modified 3D Gaussian Splatting and 4DGaussians. Download our [processed assets](https://github.com/shisyy/SemGuard/releases/tag/rendered-assets-v2) and extract them from the repository root to restore `output/`.
 
+```bash
+sha256sum -c SHA256SUMS
+for archive in semguard-rendered-*.tar.zst; do
+    tar --zstd -xf "$archive"
+done
+```
+
+Extract both LLFF parts into the same directory. Download original images/camera data from the dataset links above. Set decoder-training image paths in [ms_utils_divid.py](ms_utils_divid.py) and watermarking paths in the stage scripts.
+
+
 ## Stage 1: Train the watermark decoder
 
 See [setup_run_3d.sh](setup_run_3d.sh) and [setup_run_4d.sh](setup_run_4d.sh) for commands Stage 1.
@@ -65,6 +75,6 @@ See [setup_run_3d.sh](setup_run_3d.sh) and [setup_run_4d.sh](setup_run_4d.sh) fo
 
 ## Acknowledgements
 
-We build our project on [GuardSplat](https://github.com/NarcissusEx/GuardSplat), [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting), [4DGaussians](https://github.com/hustvl/4DGaussians), [CLIP](https://github.com/openai/CLIP) and [Diff-JPEG](https://github.com/necla-ml/Diff-JPEG). We thank the authors for their work and code release.
+We build our project on [GuardSplat](https://github.com/NarcissusEx/GuardSplat), [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting), [4DGaussians](https://github.com/hustvl/4DGaussians), [CLIP](https://github.com/openai/CLIP) and [Diff-JPEG](https://github.com/necla-ml/Diff-JPEG). We thank the authors for their work and code release. Please cite the original methods and datasets and follow their licenses and terms.
 
 Contact: `yyshi@buaa.edu.cn`.
