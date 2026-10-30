@@ -97,11 +97,145 @@ Configure the variables used by these existing commands:
 
 The decoder path in both supplied scripts is `decoders/nerf_synthetic/${EXP_NAME}`. Follow the actual script values for the experiment rather than an additional launch wrapper.
 
+Set the scene paths as shown in the scripts, replacing the placeholders with your own directories and scene name:
+
+```bash
+root="<your_nerf_dir>"
+out_root="<your_render_dir>"
+exp_root="<your_Watermark_output_dir>"
+item="<nerf_item>"
+mdir=$out_root/$item
+sdir=$exp_root/${EXP_NAME}/$item
+```
+
+### Static 3DGS: embedding
+
+From the Stage 2 section of `setup_run_3d.sh` (the supplied example uses NeRF Synthetic):
+
+```bash
+python run_3Ddivid.py \
+    --decoder_path decoders/nerf_synthetic/${EXP_NAME} \
+    -s "$root/$item" \
+    -m "$mdir" \
+    -w \
+    --mode train \
+    --msg_len "$msg_len" \
+    --sdir "$sdir" \
+    --batch_size 16 \
+    --dtype blender \
+    --num_epochs2 "$num_epochs2"
+```
+
+### Static 3DGS: evaluation and visualization
+
+Set `resume_num` to the checkpoint you want to evaluate, as specified in the script:
+
+```bash
+resume_num="<your_resume_num>"
+python run_3Ddivid.py \
+    --decoder_path decoders/nerf_synthetic/${EXP_NAME} \
+    -s "$root/$item" \
+    -m "$mdir" \
+    -w \
+    --mode eval \
+    --msg_len "$msg_len" \
+    --sdir "$sdir" \
+    --batch_size 16 \
+    --dtype blender \
+    --num_epochs2 100 \
+    --test_cams 10 \
+    --resume_num "$resume_num" \
+    --save_map
+```
+
+### Dynamic 4DGS: embedding
+
+The corresponding command from the Stage 2 section of `setup_run_4d.sh` is reproduced with its supplied arguments:
+
+```bash
+python run_4Ddivid.py \
+    --decoder_path decoders/nerf_synthetic/${EXP_NAME} \
+    -s "$root/$item" \
+    -m "$mdir" \
+    -w \
+    --mode train \
+    --msg_len "$msg_len" \
+    --sdir "$sdir" \
+    --batch_size 16 \
+    --dtype blender \
+    --num_epochs2 "$num_epochs2"
+```
+
+### Dynamic 4DGS: evaluation and visualization
+
+From the evaluation section of `setup_run_4d.sh`:
+
+```bash
+resume_num="<your_resume_num>"
+python run_4Ddivid.py \
+    --decoder_path decoders/nerf_synthetic/${EXP_NAME} \
+    -s "$root/$item" \
+    -m "$mdir" \
+    -w \
+    --mode eval \
+    --msg_len "$msg_len" \
+    --sdir "$sdir" \
+    --batch_size 16 \
+    --dtype blender \
+    --num_epochs2 100 \
+    --test_cams 10 \
+    --resume_num "$resume_num" \
+    --save_map
+```
+
 ## 5) Stage III: visual distortions for 3DGS
 
 The **Stage 3: Add visual distortions to the 3DGS model** section of [setup_run_3d.sh](setup_run_3d.sh) provides single-distortion and combined-distortion settings and the associated command. Distortions are implemented in [attack_utils.py](attack_utils.py).
 
 The supplied single-distortion list contains Gaussian noise, rotation, resize, Gaussian blur, crop, brightness, JPEG compression and VAE compression. The combined example contains crop, brightness and JPEG compression. Use the parameters and command in that script for the intended experiment.
+
+The distortion settings in `setup_run_3d.sh` are:
+
+```bash
+# Single distortions
+attacks=(
+  GaussianNoise
+  Rotation
+  Resize
+  GaussianBlur
+  Crop
+  Brightness
+  JPEGCompress
+  VAEBmshj2018
+)
+
+# Combined distortions
+combined_attacks=(
+  Crop
+  Brightness
+  JPEGCompress
+)
+```
+
+The Stage 3 command is transcribed below, retaining the entry-point filename and arguments written in the author's script. Set `decoder_path`, `attack`, `batch_size`, `learning_rate`, `lambda_msg` and `eval_interval` for the intended distortion experiment:
+
+```bash
+python run_3Ddivid_.py \
+    --decoder_path "$decoder_path" \
+    -s "$root/$item" \
+    -m "$mdir" \
+    -w \
+    --mode train \
+    --msg_len "$msg_len" \
+    --sdir "$sdir" \
+    --batch_size "$batch_size" \
+    --dtype blender \
+    --atypes "$attack" \
+    --learning_rate "$learning_rate" \
+    --lambda_msg "$lambda_msg" \
+    --num_epochs2 100 \
+    --eval_interval "$eval_interval"
+```
 
 ## Qualitative comparison
 
