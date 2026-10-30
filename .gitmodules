@@ -1,0 +1,7 @@
+[submodule "gaussian-splatting"]
+	path = gaussian-splatting
+	url = https://github.com/graphdeco-inria/gaussian-splatting
+
+[submodule "4DGaussians"]
+	path = 4DGaussians
+	url = https://github.com/hustvl/4DGaussians  
