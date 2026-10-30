@@ -15,6 +15,35 @@ Official implementation of **SemGuard**.
 
 We combine message-related CLIP text features with visual features from unwatermarked images to train a reusable message decoder. We then freeze the decoder and CLIP encoders and optimize SH offsets for watermark embedding.
 
+## Project structure
+
+```text
+SemGuard/
+├── 4DGaussians/          # Dynamic Gaussian backbone
+├── gaussian-splatting/   # Static Gaussian backbone
+├── assets/              # README figures
+├── decoders/            # Trained message decoders
+├── Experiment/          # Watermark experiment results
+├── output/              # Gaussian assets downloaded from Releases
+│   ├── dnerf/
+│   ├── hypernerf/
+│   ├── nerf_llff_data/
+│   └── nerf_synthetic/
+├── .gitmodules
+├── attack_utils.py      # Visual distortions
+├── dnerf_utils.py       # Dynamic scene utilities
+├── nerf_utils.py        # Static scene utilities
+├── eval_watermark.ipynb
+├── make_decoder_divid.py # Decoder training and evaluation
+├── ms_utils_divid.py    # CLIP, decoder and image loading
+├── requirements.txt
+├── run_3Ddivid.py        # 3DGS watermarking
+├── run_4Ddivid.py        # 4DGS watermarking
+├── setup_run_3d.sh       # 3DGS stage commands
+├── setup_run_4d.sh       # 4DGS stage commands
+└── README.md
+```
+
 ## Get started
 
 - Python 3.12
