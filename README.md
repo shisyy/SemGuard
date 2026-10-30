@@ -1,6 +1,6 @@
 # SemGuard: Semantics-Decoupled Watermarking for Gaussian Splatting
 
-**Yingying Shi, Zhong Zhou, Bin Zhou**  
+**[Yingying Shi](https://scholar.google.com/citations?hl=zh-CN&user=b05IAh4AAAAJ), [Zhong Zhou](https://scholar.google.com/citations?hl=zh-CN&user=sWbTqxEAAAAJ), [Bin Zhou](https://scholar.google.com/citations?hl=en&user=tG4RnyYAAAAJ&view_op=list_works&sortby=pubdate)**  
 Beihang University, Zhongguancun Laboratory, and Peace-Bay Academy of Virtual Reality
 
 Official implementation of **SemGuard**.
