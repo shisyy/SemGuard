@@ -1,27 +1,5 @@
-__pycache__/
-*.py[cod]
-.DS_Store
-.idea/
-.vscode/
-.env
-data/
-output/
-outputs/
-decoders/
-Experiment/
-Watermark_4D/
-wandb/
-build/
-dist/
-*.egg-info/
-*.so
-*.o
-*.pth
-*.pkl
-*.pt
-*.ply
-*.tar*
-*.zip
+# Processed data is distributed separately through GitHub Releases.
+/output/**
+!/output/.gitkeep
+# Manuscript PDFs are not part of this release.
 *.pdf
-gaussian-splatting/
-4DGaussians/

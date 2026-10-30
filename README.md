@@ -29,6 +29,8 @@ Environment and dependency commands are provided in the author's [requirements.t
 
 The two backbone repositories are maintained by their original authors and are not bundled here. The SemGuard source files, configuration and stage scripts are uploaded unchanged from the author's supplied source directory.
 
+The supplied directory structure is retained, including `Experiment/`, `decoders/`, `gaussian-splatting/`, `4DGaussians/` and `output/`. Empty directories use zero-byte `.gitkeep` placeholders because Git does not track directories by themselves. The backbone directories contain placeholders only; obtain their code from the original links above. The supplied `__pycache__/` files are also preserved. Processed data inside `output/` remains a separate Release download.
+
 ## 2) Data and clean Gaussian assets
 
 SemGuard uses four benchmark datasets:
