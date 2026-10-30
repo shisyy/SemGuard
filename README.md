@@ -41,19 +41,15 @@ We use [NeRF Synthetic (Blender)](https://www.matthewtancik.com/nerf), [LLFF](ht
 
 We generate Gaussian assets using modified 3D Gaussian Splatting and 4DGaussians. Download our [processed assets](https://github.com/shisyy/SemGuard/releases/tag/rendered-assets-v2) and extract them from the repository root to restore `output/`. See [extraction instructions](DATA_PREPARATION.md).
 
-## Stage 1: Train and evaluate the message decoder
+## Stage 1: Train the watermark decoder
 
-See [setup_run_3d.sh](setup_run_3d.sh) and [setup_run_4d.sh](setup_run_4d.sh) for commands.
+See [setup_run_3d.sh](setup_run_3d.sh) and [setup_run_4d.sh](setup_run_4d.sh) for commands Stage 1.
 
-## Stage 2: Watermark a 3DGS model
+## Stage 2: Train and evaluate the SemGuard 3DGS model and 4DGS model
 
-See [setup_run_3d.sh](setup_run_3d.sh) for commands.
+See [setup_run_3d.sh](setup_run_3d.sh) and [setup_run_4d.sh](setup_run_4d.sh) for commands Stage 2.
 
-## Stage 3: Watermark a 4DGS model
-
-See [setup_run_4d.sh](setup_run_4d.sh) for commands.
-
-## Stage 4: Visual distortions
+## Visual distortions
 
 See [setup_run_3d.sh](setup_run_3d.sh) for commands.
 
