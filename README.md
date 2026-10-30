@@ -39,9 +39,7 @@ Follow the installation commands in [requirements.txt](requirements.txt). Set up
 
 We use [NeRF Synthetic (Blender)](https://www.matthewtancik.com/nerf), [LLFF](https://bmild.github.io/llff/), [D-NeRF](https://github.com/albertpumarola/D-NeRF) and [HyperNeRF](https://github.com/google/hypernerf).
 
-Download our [processed Gaussian assets](https://github.com/shisyy/SemGuard/releases/tag/rendered-assets-v2), or prepare them with 3D Gaussian Splatting and 4DGaussians. We modified the backbones to generate these assets; unmodified upstream code may produce different results.
-
-Extract the archives under `output/`. See [data preparation](DATA_PREPARATION.md) for details.
+We generate Gaussian assets using modified 3D Gaussian Splatting and 4DGaussians. Download our [processed assets](https://github.com/shisyy/SemGuard/releases/tag/rendered-assets-v2) and extract them from the repository root to restore `output/`. See [extraction instructions](DATA_PREPARATION.md).
 
 ## 3) Train and evaluate the message decoder
 
